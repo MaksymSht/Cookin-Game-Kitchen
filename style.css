@@ -1,0 +1,73 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+}
+
+#kitchen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  /* !!! ВАЖЛИВО: aspect-ratio налаштовано під ваші точні розміри зображення 5751x3088 !!! */
+  aspect-ratio: 5751 / 3088;
+}
+
+#kitchen-bg-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Зображення заповнює весь контейнер, обрізаючи зайве */
+  object-position: center; /* Центруємо зображення */
+}
+
+#dropzone-container {
+  position: absolute;
+  /* JavaScript буде встановлювати top, left, width, height */
+}
+
+/* Стилі для дроп-боксів: невидимі, але з підказкою при наведенні */
+.dropzone {
+  position: absolute;
+  border: none; /* Без контуру */
+  background-color: transparent; /* Без фону */
+  border-radius: 10px;
+  transition: 0.3s; /* Плавний перехід */
+  box-sizing: border-box;
+}
+
+/* Ефект при наведенні курсору */
+.dropzone.hovered {
+  border: 2px dashed rgba(160, 255, 175, 0.4); /* Легкий контур */
+  background-color: rgba(160, 255, 175, 0.1); /* Прозорий фон */
+}
+
+/* Ваші налаштування позиціонування дроп-зон (відсотки відносно #dropzone-container) */
+#pot {
+  left: 52.5%;
+  bottom: 46%;
+  width: 12%;
+  height: 20%;
+}
+
+#oven {
+  left: 45%;
+  bottom: 19%;
+  width: 18%;
+  height: 24%;
+}
+
+#fridge {
+  right: 13%;
+  top: 16%;
+  width: 15%;
+  height: 64%;
+}
