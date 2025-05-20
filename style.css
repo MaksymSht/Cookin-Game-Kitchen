@@ -80,26 +80,24 @@ html,
  }
  
  /* --- Стилі для інгредієнтів --- */
- #ingredients-slots {
-    position: fixed;
-    bottom: 20px; 
+#ingredients-slots {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5vw; /* Базовий відступ, буде адаптуватися */
+    position: absolute;
+    bottom: 30px; /* Позиціонування від низу */
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    flex-wrap: wrap; 
-    gap: 1.5vw; 
-    justify-content: center; 
     width: 95%; /* Ширина контейнера */
-    max-width: 1600px; 
-    padding: 1vw 27px; 
+    max-width: 1600px; /* Максимальна ширина контейнера */
+    background-color: rgba(0, 0, 0, 0.3);
     border-radius: 15px;
-    z-index: 100;
-    box-sizing: border-box;
-    background: transparent; 
-    align-items: flex-start; 
-    max-height: calc(25vh + 30px); /* Приблизно 25% висоти екрану + невеликий запас. Буде адаптуватися, щоб вмістити 2 ряди. */
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    white-space: nowrap; /* Щоб flex-item не переносили свій контент */
 }
-
 #ingredients-slots::-webkit-scrollbar {
     display: none;
 }
@@ -109,19 +107,17 @@ html,
 }
  
 .ingredient-item {
-    width: clamp(65px, 6.5vw, 90px); 
-    height: clamp(65px, 6.5vw, 90px); 
-    flex-shrink: 0;
-    cursor: grab;
-    position: relative;
+    background-color: transparent; /* Прибираємо фон окремих боксів */
+    box-shadow: none;
+    border: none;
+    outline: none;
+    flex-shrink: 0; /* Не дозволяє елементам стискатися менше свого вмісту (або min-width/height) */
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.15); /* Фон для кожного окремого слоту */
-    border-radius: 10px;
-    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
-    box-sizing: border-box;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    width: clamp(75px, 6vw, 100px); /* Збільшив min-size та max-size */
+    height: clamp(75px, 6vw, 100px);
 }
 
 .ingredient-item:hover {
@@ -130,11 +126,14 @@ html,
 }
 
 .ingredient-item img {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
     object-fit: contain;
-    pointer-events: none;
 }
+
+
+
 
 .ingredient-item.dragging {
     opacity: 0.7;
@@ -165,163 +164,53 @@ html,
     opacity: 1;
     transform: translateX(-50%) translateY(-10px);
 }
+
+
  
  @keyframes fadeIn {
      from { opacity: 0; }
      to { opacity: 1; }
  }
  
- /* --- Адаптивність інгредієнтів на малих екранах --- */
-/* Налаштування для середніх екранів (планшети) */
-@media (max-width: 1024px) {
-    #ingredients-slots {
-        gap: 1.2vw; /* Трохи менший зазор */
-        bottom: 15px;
-        padding: 0.8vw 15px; /* <<-- Зменшуємо горизонтальний відступ до 15px */
-        max-height: calc(30vh + 30px); /* Можливо, потрібно трохи більше висоти, щоб вмістити 2 ряди */
-    }
-
-    .ingredient-item {
-        width: clamp(60px, 7.5vw, 85px); /* Зменшуємо трохи більше */
-        height: clamp(60px, 7.5vw, 85px);
-    }
-}
-
-/* Налаштування для невеликих екранів (мобільні в ландшафті) */
-/* --- Адаптивність інгредієнтів на малих екранах --- */
-/* Налаштування для середніх екранів (планшети) */
-@media (max-width: 1024px) {
+/* Загальні налаштування для планшетів (ширина вікна до 1280px) */
+/* Це покриває більшість 7", 8", 10.1" та 10.5" планшетів в ландшафтній орієнтації */
+@media (max-width: 1280px) {
     #ingredients-slots {
         gap: 1.2vw;
-        bottom: 15px;
         padding: 8px 15px;
-        max-height: 180px;
     }
-
     .ingredient-item {
-        /* Зменшуємо min і max значення, щоб бокси були меншими на планшетах */
-        width: clamp(50px, 6vw, 75px);
-        height: clamp(50px, 6vw, 75px);
+        /* Для 1280px, 1200px, 1024px */
+        /* Іконки мають бути трохи меншими, але не "зовсім малими" */
+        width: clamp(65px, 6.5vw, 90px);
+        height: clamp(65px, 6.5vw, 90px);
     }
 }
 
-/* Налаштування для невеликих екранів (мобільні в ландшафті) */
-@media (max-width: 768px) {
-    #ingredients-slots {
-        gap: 1vw;
-        bottom: 10px;
-        padding: 6px 10px;
-        max-height: 150px;
-    }
-
-    .ingredient-item {
-        /* Ще більше зменшуємо min і max значення для мобільних екранів */
-        width: clamp(40px, 7vw, 65px);
-        height: clamp(40px, 7vw, 65px);
-    }
-
-    .ingredient-tooltip {
-        font-size: 0.8em;
-        padding: 4px 8px;
-    }
-
-    #toggle-task-panel {
-        width: 45px;
-        height: 45px;
-        top: 15px;
-        right: 15px;
-    }
-}
-
-/* Налаштування для дуже маленьких екранів (старі телефони в ландшафті) */
-/* --- Адаптивність інгредієнтів на малих екранах --- */
-/* Налаштування для середніх екранів (планшети) */
+/* Для більшості планшетів 1024x768 (iPad 9.7", багато Android) та менших 8" */
 @media (max-width: 1024px) {
     #ingredients-slots {
-        gap: 1.2vw;
-        bottom: 15px;
-        padding: 8px 15px;
-        max-height: 180px;
-    }
-
-    .ingredient-item {
-        /* Зменшуємо min і max значення, щоб бокси були меншими на планшетах */
-        width: clamp(50px, 6vw, 75px);
-        height: clamp(50px, 6vw, 75px);
-    }
-
-    .ingredient-item img {
-        /* Трохи зменшуємо максимальні розміри зображень на планшетах */
-        max-width: 80%;
-        max-height: 80%;
-    }
-}
-
-/* Налаштування для невеликих екранів (мобільні в ландшафті) */
-@media (max-width: 768px) {
-    #ingredients-slots {
         gap: 1vw;
-        bottom: 10px;
-        padding: 6px 10px;
-        max-height: 150px;
+        bottom: 20px;
+        padding: 8px 12px;
     }
-
     .ingredient-item {
-        /* Ще більше зменшуємо min і max значення для мобільних екранів */
-        width: clamp(40px, 7vw, 65px);
-        height: clamp(40px, 7vw, 65px);
-    }
-
-    .ingredient-item img {
-        /* Ще більше зменшуємо максимальні розміри зображень на мобільних */
-        max-width: 70%;
-        max-height: 70%;
-    }
-
-    .ingredient-tooltip {
-        font-size: 0.8em;
-        padding: 4px 8px;
-    }
-
-    #toggle-task-panel {
-        width: 45px;
-        height: 45px;
-        top: 15px;
-        right: 15px;
+        /* Для 1024px та менших */
+        width: clamp(55px, 7vw, 80px);
+        height: clamp(55px, 7vw, 80px);
     }
 }
 
-/* Налаштування для дуже маленьких екранів (старі телефони в ландшафті) */
-@media (max-width: 480px) {
+/* Для малих планшетів (7", 8") та великих телефонів в ландшафтній орієнтації */
+@media (max-width: 768px) {
     #ingredients-slots {
         gap: 0.8vw;
-        bottom: 5px;
-        padding: 4px 5px;
-        max-height: 120px;
+        bottom: 15px;
+        padding: 6px 10px;
     }
-
     .ingredient-item {
-        /* Максимально зменшуємо min і max значення для дуже маленьких екранів */
-        width: clamp(35px, 8vw, 55px);
-        height: clamp(35px, 8vw, 55px);
-    }
-
-    .ingredient-item img {
-        /* Максимально зменшуємо максимальні розміри зображень на дуже маленьких екранах */
-        max-width: 60%;
-        max-height: 60%;
-    }
-
-    .ingredient-tooltip {
-        font-size: 0.7em;
-        padding: 3px 6px;
-    }
-
-    #toggle-task-panel {
-        width: 35px;
-        height: 35px;
-        top: 10px;
-        right: 10px;
+        width: clamp(45px, 8vw, 70px);
+        height: clamp(45px, 8vw, 70px);
     }
 }
  

@@ -105,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Встановлюємо dropEffect для відображення курсора
             event.dataTransfer.dropEffect = 'move';
         });
-
         ingredientDiv.addEventListener('dragend', (event) => {
             ingredientDiv.classList.remove('dragging');
         });
