@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const kitchenBgImg = document.getElementById('kitchen-bg-img');
     const dropzoneContainer = document.getElementById('dropzone-container');
-    const potDropzone = document.getElementById('pot');
+    const potDropzone = document.getElementById('pot'); // Важливий елемент для позиціонування
 
     const ingredientsContainer = document.getElementById('ingredients-slots');
     const ingredientModal = document.getElementById('ingredient-modal');
@@ -11,13 +11,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const playSoundButton = ingredientModal.querySelector('.play-sound-button');
     const levelCompleteScreen = document.getElementById('level-complete-screen');
     const feedbackMessageDiv = document.getElementById('feedback-message');
-    const scoreFeedbackDiv = document.getElementById('score-feedback'); // Новий елемент для балів
+    // scoreFeedbackDiv більше не використовується для динамічних плаваючих повідомлень,
+    // тому що ми створюємо новий елемент для кожного повідомлення, яким керує CSS.
+    // const scoreFeedbackDiv = document.getElementById('score-feedback'); 
 
     // Елементи бічної панелі
     const toggleTaskPanelButton = document.getElementById('toggle-task-panel');
     const taskPanel = document.getElementById('task-panel');
     const closeTaskPanelButton = document.getElementById('close-task-panel');
 
+        toggleTaskPanelButton.addEventListener('click', () => {
+        taskPanel.classList.toggle('active');
+    });
+
+    closeTaskPanelButton.addEventListener('click', () => {
+        taskPanel.classList.remove('active');
+    });
+
+    // --- МАСИВ З ПОВІДОМЛЕННЯМИ ---
+    const correctMessages = [
+        "Amazing!",
+        "Impressive!",
+        "Great!",
+        "Fantastic!",
+        "Awesome!",
+        "Well done!",
+        "Keep going!"
+    ];
 
     let currentScore = 0;
     const correctIngredientsAdded = new Set();
@@ -26,14 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Дані для рівня "Creamy Vegetables Soup" ---
     const levelData = {
         name: "Creamy Vegetables Soup",
-        // Макс. бали: 9 правильних * 3 бали = 27 + 3 бонусні бали = 30
         maxScore: 30,
         scorePerCorrect: 3,
         penaltyPerIncorrect: -2,
         correctIngredients: ['mushrooms', 'potato', 'carrot', 'heavy-cream', 'garlic', 'corn', 'peas', 'onion', 'tomato'],
         incorrectIngredients: ['pomegranate', 'melon', 'coconut'],
         allIngredients: [
-            // Властивості thumbImg та modalImg для різних розмірів зображень
             { id: 'mushrooms', name: 'Mushrooms', thumbImg: 'img/Creamy Vegetables Soup/Correct ingridients/icons/icons8-mushroom-30.png', 
                 modalImg: 'img/Creamy Vegetables Soup/Correct ingridients/modal/mushrooms.png' },
             { id: 'potato', name: 'Potato', thumbImg: 'img/Creamy Vegetables Soup/Correct ingridients/icons/icons8-mushroom-30.png', 
@@ -91,25 +109,22 @@ document.addEventListener('DOMContentLoaded', () => {
         ingredientDiv.dataset.id = ingredient.id;
 
         const img = document.createElement('img');
-        img.src = ingredient.thumbImg; // Використовуємо thumbImg для іконки
+        img.src = ingredient.thumbImg;
         img.alt = ingredient.name;
-        ingredientDiv.draggable = true; // draggable на div, pointer-events: none на img
+        ingredientDiv.draggable = true;
 
         ingredientDiv.appendChild(img);
         ingredientsContainer.appendChild(ingredientDiv);
 
-        // --- Drag Events для інгредієнтів ---
         ingredientDiv.addEventListener('dragstart', (event) => {
             event.dataTransfer.setData('text/plain', ingredient.id);
             ingredientDiv.classList.add('dragging');
-            // Встановлюємо dropEffect для відображення курсора
             event.dataTransfer.dropEffect = 'move';
         });
         ingredientDiv.addEventListener('dragend', (event) => {
             ingredientDiv.classList.remove('dragging');
         });
 
-        // --- Hover (наведення) на інгредієнті для показу назви ---
         ingredientDiv.addEventListener('mouseenter', () => {
             const tooltip = document.createElement('span');
             tooltip.classList.add('ingredient-tooltip');
@@ -124,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // --- Click (клік) на інгредієнті для модального вікна ---
         ingredientDiv.addEventListener('click', () => {
             showIngredientModal(ingredient);
         });
@@ -134,14 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
     levelData.allIngredients.forEach(ing => createIngredientElement(ing));
 
     // --- Логіка Drag & Drop для дроп-зон ---
-    // Обираємо тільки активні дроп-зони
     const activeDropZones = document.querySelectorAll('.dropzone.active-dropzone');
 
     activeDropZones.forEach(zone => {
         zone.addEventListener('dragover', (event) => {
             event.preventDefault();
             zone.classList.add('hovered');
-            event.dataTransfer.dropEffect = 'move'; // Вказуємо, що переміщення дозволено
+            event.dataTransfer.dropEffect = 'move';
         });
 
         zone.addEventListener('dragleave', (event) => {
@@ -161,39 +174,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Перевіряємо, чи скинули в горщик (pot)
             if (zone.id === 'pot') {
                 if (levelData.correctIngredients.includes(ingredientId)) {
-                    // Правильний інгредієнт для супу
                     if (!correctIngredientsAdded.has(ingredientId)) {
                         currentScore += levelData.scorePerCorrect;
                         correctIngredientsAdded.add(ingredientId);
                         draggedIngredientEl.remove();
                         console.log(`Правильний інгредієнт: ${ingredientData.name}. Поточні бали: ${currentScore}`);
-                        showScoreFeedback(levelData.scorePerCorrect, 'Молодець! Так тримати! 🎉');
+                        const randomMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+                        showScoreFeedback(levelData.scorePerCorrect, randomMessage, potDropzone); // Передаємо potDropzone
                         checkLevelCompletion();
                     } else {
                         console.log(`Інгредієнт ${ingredientData.name} вже додано. Бали не змінено.`);
                         showFeedbackMessage(`${ingredientData.name} is already in the soup!`);
                     }
                 } else {
-                    // Неправильний інгредієнт для супу
                     currentScore += levelData.penaltyPerIncorrect;
-                    incorrectIngredientsDroppedCount++; // Збільшуємо лічильник неправильних
-                    showFeedbackMessage(`Oh no... You don’t use ${ingredientData.name} for this dish 😟. Try again! 😊`);
-                    showScoreFeedback(levelData.penaltyPerIncorrect, 'О ні! Спробуй ще раз! 🤦‍♂️');
+                    incorrectIngredientsDroppedCount++;
                     console.log(`Неправильний інгредієнт: ${ingredientData.name}. Поточні бали: ${currentScore}`);
+                    showFeedbackMessage(`Oh no... You don’t use ${ingredientData.name} for this dish 😟. Try again! 😊`);
+                    showScoreFeedback(levelData.penaltyPerIncorrect, "", potDropzone); // Передаємо potDropzone
                 }
             } else {
-                // Цей блок не повинен викликатися, якщо неактивні зони приховані,
-                // але залишаємо для безпеки.
                 console.log(`Скидання ${ingredientData.name} в ${zone.id} не підтримується для цього рівня.`);
-                // showFeedbackMessage(`This dish doesn't need ${ingredientData.name} in the ${zone.id}!`);
             }
         });
     });
 
-    // --- Функція для відображення повідомлень (наприклад, про неправильний інгредієнт) ---
+    // --- Функція для відображення загальних повідомлень ---
     function showFeedbackMessage(message) {
         feedbackMessageDiv.textContent = message;
         feedbackMessageDiv.style.display = 'block';
@@ -203,44 +211,63 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackMessageDiv.style.opacity = '0';
             setTimeout(() => {
                 feedbackMessageDiv.style.display = 'none';
-            }, 500); // Час має відповідати transition в CSS
-        }, 7000); // Повідомлення висить 7 секунд
+            }, 500);
+        }, 7000);
     }
 
-    // --- Функція для динамічного відображення балів ---
-    function showScoreFeedback(scoreChange, message) {
-        scoreFeedbackDiv.textContent = `${scoreChange > 0 ? '+' : ''}${scoreChange} ${message}`;
-        scoreFeedbackDiv.classList.remove('positive', 'negative'); // Скидаємо попередні класи
-        scoreFeedbackDiv.classList.add(scoreChange > 0 ? 'positive' : 'negative');
-        scoreFeedbackDiv.style.display = 'block';
-        scoreFeedbackDiv.style.opacity = '1';
+    // --- Функція для динамічного відображення балів та повідомлення (Готує для CSS) ---
+    function showScoreFeedback(scoreChange, message, targetElement) {
+        const feedbackEl = document.createElement('div');
+        feedbackEl.classList.add('score-feedback-message'); // Основний клас для стилізації
+        document.body.appendChild(feedbackEl); // Додаємо до body
 
+        if (scoreChange > 0) {
+            feedbackEl.textContent = `+${scoreChange} ${message}`;
+            feedbackEl.classList.add('positive'); // Клас для позитивних балів
+        } else {
+            feedbackEl.textContent = `${scoreChange}`;
+            feedbackEl.classList.add('negative'); // Клас для негативних балів
+        }
+
+        // Отримуємо позицію цільового елемента (горщика)
+        const rect = targetElement.getBoundingClientRect();
+        
+        // Встановлюємо початкову позицію елемента повідомлення.
+        // CSS потім візьметься за його анімацію звідси.
+        // Залишаємо його в JS, оскільки позиція залежить від горщика,
+        // а горщик може зміщуватися при зміні розміру вікна.
+        feedbackEl.style.left = `${rect.left + rect.width / 2}px`;
+        feedbackEl.style.top = `${rect.top + rect.height / 2}px`;
+        
+        // CSS візьметься за transform і opacity для анімації!
+        // Додаємо клас, який запустить анімацію в CSS
+        // Використовуємо setTimeout, щоб браузер встиг "побачити" початкові стилі перед застосуванням класу анімації
         setTimeout(() => {
-            scoreFeedbackDiv.style.opacity = '0';
-            scoreFeedbackDiv.style.transform = 'translate(-50%, -50%)'; // Скидаємо трансформацію
-            setTimeout(() => {
-                scoreFeedbackDiv.style.display = 'none';
-            }, 300); // Має відповідати transition в CSS
-        }, 1500); // Повідомлення висить 1.5 секунди
-    }
+            feedbackEl.classList.add('active'); // Цей клас запустить CSS-анімацію
+        }, 10);
 
+        // Видаляємо елемент після завершення анімації (тривалість має відповідати CSS)
+        // Припускаємо, що анімація триватиме 2 секунди
+        setTimeout(() => {
+            feedbackEl.remove();
+        }, 2000); // Час має відповідати тривалості CSS-анімації
+    }
 
     // --- Функція для перевірки завершення рівня ---
     function checkLevelCompletion() {
         if (correctIngredientsAdded.size === levelData.correctIngredients.length) {
             console.log('Рівень завершено! Всі правильні інгредієнти додані.');
 
-            // Логіка для бонусних балів
             if (incorrectIngredientsDroppedCount === 0) {
-                currentScore += 3; // Додаємо бонусні бали
+                currentScore += 3;
                 console.log(`Бонус! +3 бали за проходження без помилок. Поточні бали: ${currentScore}`);
             }
 
-            playStarsAnimation(); // Анімація зірочок
+            playStarsAnimation();
 
             setTimeout(() => {
                 showLevelCompleteScreen();
-            }, 2500); // Затримка перед показом екрану завершення, щоб побачити зірочки
+            }, 2500);
         }
     }
 
@@ -250,105 +277,88 @@ document.addEventListener('DOMContentLoaded', () => {
         starContainer.classList.add('star-container');
         document.body.appendChild(starContainer);
 
-        // Створюємо та анімуємо кілька зірочок
         for (let i = 0; i < 10; i++) {
             const star = document.createElement('div');
             star.classList.add('star');
-            // Генеруємо випадкові початкові позиції навколо центру екрана
-            star.style.left = `${Math.random() * 20 + 40}%`; // 40-60% ширини екрану
-            star.style.top = `${Math.random() * 20 + 40}%`; // 40-60% висоти екрану
+            star.style.left = `${Math.random() * 20 + 40}%`;
+            star.style.top = `${Math.random() * 20 + 40}%`;
 
-            // Випадкові кінцеві позиції для розльоту
-            const endX = Math.random() * 600 - 300; // -300 to 300px
-            const endY = Math.random() * 600 - 300; // -300 to 300px
+            const endX = Math.random() * 600 - 300;
+            const endY = Math.random() * 600 - 300;
             star.style.setProperty('--end-x', `${endX}px`);
             star.style.setProperty('--end-y', `${endY}px`);
 
-            star.style.animationDelay = `${i * 0.1}s`; // Різні затримки
-            star.style.animationDuration = `${2 + Math.random() * 1}s`; // Різна тривалість
+            star.style.animationDelay = `${i * 0.1}s`;
+            star.style.animationDuration = `${2 + Math.random() * 1}s`;
 
             starContainer.appendChild(star);
         }
 
         starContainer.addEventListener('animationend', (event) => {
-            // Видаляємо контейнер зірочок після завершення анімації останньої зірки
             if (event.target.classList.contains('star') && !starContainer.querySelector('.star')) {
                 starContainer.remove();
             }
         });
     }
 
-    // --- Функція для закриття модального вікна (винесена для перевикористання) ---
+    // --- Функція для закриття модального вікна ---
     function closeModal() {
         if (speechSynthesis.speaking) {
             speechSynthesis.cancel();
         }
-        // Видаляємо клас 'active' для анімованого закриття
         ingredientModal.classList.remove('active');
     }
 
-    // --- Призначення обробників подій для модального вікна (виконується ОДИН РАЗ) ---
-    // Ці обробники призначаються тут, всередині DOMContentLoaded, що є правильним місцем.
+    // --- Призначення обробників подій для модального вікна ---
     modalCloseButton.addEventListener('click', closeModal);
-
-    // Закриття модалки при кліку на оверлей (фон поза контентом)
     ingredientModal.addEventListener('click', (e) => {
-        if (e.target === ingredientModal) { // Перевіряємо, чи клік був саме по оверлею, а не по контенту
+        if (e.target === ingredientModal) {
             closeModal();
         }
     });
 
-    // Обробник для кнопки "Play Sound"
     playSoundButton.addEventListener('click', () => {
         if (speechSynthesis.speaking) {
             speechSynthesis.cancel();
         }
-        const textToSpeak = modalTitle.textContent; // Беремо текст з заголовка модалки
+        const textToSpeak = modalTitle.textContent;
         if (textToSpeak) {
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = 'en-US'; // Можете змінити на 'uk-UA' для української, якщо доступно
-            utterance.rate = 0.8; // Уповільнюємо швидкість вимови
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
             speechSynthesis.speak(utterance);
         }
     });
 
-
     // --- Оновлена функція showIngredientModal ---
-    // Ця функція тепер просто оновлює вміст модалки та додає клас 'active'.
-    // Вона викликається, коли користувач клікає на інгредієнт.
     function showIngredientModal(ingredient) {
-        modalImage.src = ingredient.modalImg; // Використовуємо modalImg для великого зображення
+        modalImage.src = ingredient.modalImg;
         modalImage.alt = ingredient.name;
         modalTitle.textContent = ingredient.name;
-
-        // Додаємо клас 'active' для відображення модалки з анімацією
         ingredientModal.classList.add('active'); 
     }
 
     // --- Функція для показу екрану завершення рівня ---
     function showLevelCompleteScreen() {
-        // Ховаємо елементи ігрового поля
         if (ingredientsContainer) ingredientsContainer.style.display = 'none';
         if (dropzoneContainer) dropzoneContainer.style.display = 'none';
         if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'none';
-        if (taskPanel) taskPanel.classList.remove('active'); // Закриваємо бічну панель
+        if (taskPanel) taskPanel.classList.remove('active');
 
-
-        // Генеруємо HTML для правильних і неправильних інгредієнтів
         const correctIngsHtml = levelData.correctIngredients.map(id => {
             const ing = levelData.allIngredients.find(i => i.id === id);
             return `<div class="ingredient-display-item correct" data-id="${ing.id}">
-                        <img src="${ing.thumbImg}" alt="${ing.name}">
-                        <span>${ing.name}</span>
-                    </div>`;
+                            <img src="${ing.thumbImg}" alt="${ing.name}">
+                            <span>${ing.name}</span>
+                        </div>`;
         }).join('');
 
         const incorrectIngsHtml = levelData.incorrectIngredients.map(id => {
             const ing = levelData.allIngredients.find(i => i.id === id);
             return `<div class="ingredient-display-item incorrect" data-id="${ing.id}">
-                        <img src="${ing.thumbImg}" alt="${ing.name}">
-                        <span>${ing.name}</span>
-                    </div>`;
+                            <img src="${ing.thumbImg}" alt="${ing.name}">
+                            <span>${ing.name}</span>
+                        </div>`;
         }).join('');
 
         levelCompleteScreen.innerHTML = `
@@ -370,38 +380,26 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <button id="next-level-button">Next Level</button>
         `;
-        levelCompleteScreen.style.display = 'flex'; // Показуємо екран завершення
+        levelCompleteScreen.style.display = 'flex';
 
-        // Додаємо обробники подій для кліку на інгредієнти на екрані завершення (без hover)
         levelCompleteScreen.querySelectorAll('.ingredient-display-item').forEach(item => {
             item.addEventListener('click', () => {
                 const ingredientId = item.dataset.id;
-                const ingredient = levelData.allIngredients.find(ing => ing.id === ingredientId);
+                const ingredient = levelData.allIngredients.find(i => i.id === ingredientId);
                 if (ingredient) {
                     showIngredientModal(ingredient);
                 }
             });
-            // Видалено обробники mouseenter та mouseleave
         });
 
-        // Обробник кліку для кнопки "Next Level"
         document.getElementById('next-level-button').addEventListener('click', () => {
             alert('Перехід до наступного рівня! (Тут можна додати логіку переходу)');
-            location.reload(); // Для простоти, просто перезавантажуємо сторінку
+            location.reload();
         });
     }
 
-    // --- Логіка бічної панелі ---
-    toggleTaskPanelButton.addEventListener('click', () => {
-        taskPanel.classList.toggle('active');
-    });
-
-    closeTaskPanelButton.addEventListener('click', () => {
-        taskPanel.classList.remove('active');
-    });
-
-    // --- Ініціалізація: викликаємо updateDropzoneContainerPosition після завантаження зображення та при зміні розміру вікна ---
+    // --- Ініціалізація ---
     kitchenBgImg.addEventListener('load', updateDropzoneContainerPosition);
     window.addEventListener('resize', updateDropzoneContainerPosition);
-    updateDropzoneContainerPosition(); // Викликаємо один раз, якщо зображення вже в кеші
+    updateDropzoneContainerPosition();
 });

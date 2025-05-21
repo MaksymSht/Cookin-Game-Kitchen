@@ -215,24 +215,72 @@ html,
 }
  
  /* --- Стилі для повідомлення про помилку --- */
- #feedback-message {
-     position: fixed;
-     top: 50%;
-     left: 50%;
-     transform: translate(-50%, -50%);
-     background-color: rgba(255, 0, 0, 0.85); /* Червоний напівпрозорий фон */
-     color: white;
-     padding: 15px 25px;
-     border-radius: 10px;
-     z-index: 1500; /* Поверх всього */
-     font-size: 1.5em;
-     font-weight: bold;
-     text-align: center;
-     opacity: 0;
-     transition: opacity 0.5s ease-in-out;
-     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-     pointer-events: none; /* Щоб не перехоплював кліки */
- }
+/* Базові стилі для плаваючого повідомлення про очки */
+#feedback-message {
+    position: fixed; /* Фіксоване позиціонування, щоб завжди було видно */
+    top: 5%; /* Відступ від верхнього краю */
+    left: 50%; /* По центру по горизонталі */
+    transform: translateX(-50%); /* Точне центрування по горизонталі */
+    
+    background-color: rgba(255, 0, 0, 0.8); /* Червоний напівпрозорий фон */
+    color: white; /* Білий текст */
+    padding: 15px 30px; /* Відступи всередині повідомлення */
+    border-radius: 10px; /* Закруглені кути */
+    font-family: 'Comic Sans MS', cursive, sans-serif; /* Приклад "дружнього" шрифту */
+    font-size: 1.8rem; /* Досить великий шрифт */
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Легка тінь для об'єму */
+    z-index: 6000; /* Має бути вище всіх інших елементів, навіть над повідомленнями про бали */
+    
+    opacity: 0; /* Спочатку повністю прозорий */
+    display: none; /* Спочатку прихований */
+    
+    /* Анімація появи та зникнення */
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.score-feedback-message {
+    position: absolute; /* Позиціонуємо відносно body */
+    /* top і left будуть встановлені JS, але transform: translate(-50%, -50%) 
+       буде центрувати сам елемент відносно цієї точки */
+    transform: translate(-50%, -50%); 
+    
+    font-family: 'Impact', Haettenschweiler, "Arial Narrow Bold", sans-serif; /* Приклад шрифту, заміни на свій */
+    font-size: 3rem; /* Великий розмір шрифту */
+    font-weight: bold;
+    text-shadow: 
+        -1px -1px 0 #000,  
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000; /* Обведення тексту для читабельності */
+    white-space: nowrap; /* Щоб текст не переносився */
+    z-index: 5000; /* Забезпечує, що повідомлення буде над іншими елементами */
+    pointer-events: none; /* Щоб повідомлення не блокувало кліки під собою */
+    opacity: 0; /* Початкова прозорість (приховано) */
+
+    /* Анімація - це те, що ми контролюємо тут */
+    /* Використовуємо transition для плавного зникнення */
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* Стилі для позитивних балів */
+.score-feedback-message.positive {
+    color: #4CAF50; /* Зелений колір */
+}
+
+/* Стилі для негативних балів */
+.score-feedback-message.negative {
+    color: #F44336; /* Червоний колір */
+}
+
+/* Коли JS додає клас 'active', починається анімація */
+.score-feedback-message.active {
+    opacity: 1; /* Зробити видимим */
+    transform: translate(-50%, -150%); /* Рух вгору (зміщення на 150% власної висоти вгору від центру) */
+    /* Тривалість анімації тут має відповідати setTimeout в JS (2 секунди) */
+    /* Оскільки JS керує remove, то це просто кінцевий стан анімації */
+}
 
 /* --- Стилі для модального вікна --- */
 
@@ -603,6 +651,7 @@ html,
      justify-content: center;
      align-items: center;
      transition: background-color 0.3s, transform 0.2s;
+     cursor: pointer;
  }
  
  #toggle-task-panel img {
