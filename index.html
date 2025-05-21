@@ -5,6 +5,9 @@
      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
      <title>Cooking Game - Creamy Vegetables Soup</title>
      <link rel="stylesheet" href="style.css" />
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
+     integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" 
+     crossorigin="anonymous" referrerpolicy="no-referrer" />
  </head>
  <body>
      <div id="kitchen">
@@ -26,7 +29,7 @@
      </div>
  
      <button id="toggle-task-panel" title="View Task">
-         <img src="/img/icons-task.png" alt="Task Icon" width="48" height="48">
+         <img class = "task-icon" src = "/img/icons-task.png" alt="">
      </button>
 
      <aside id="task-panel" class="hidden">
@@ -36,23 +39,27 @@
          </div>
          <div class="task-panel-content">
              <h4>Cook Creamy Vegetables Soup</h4>
+             <p class="hint">Hint: Use the pot to cook soup. 😉</p>
              <p>To cook it, you need to use the correct ingredients.</p>
              <p>Each correct or incorrect choice gives or takes away points.</p>
              <p>Try to get as many points as possible.</p>
              <p class="bonus-info">**Bonus:** Get an extra 3 points if you add all correct ingredients without any mistakes!</p>
              <p class="believe-message">I believe in you! 😊</p>
+             
          </div>
      </aside>
  
  
      <div id="ingredients-slots"></div>
  
-     <div id="ingredient-modal" class="modal-overlay" style="display: none;">
+     <div id="ingredient-modal" class="modal-overlay">
          <div class="modal-content">
              <span class="close-button">&times;</span>
              <img src="" alt="" class="modal-image">
              <h3 class="modal-title"></h3>
-             <button class="play-sound-button">Play Sound</button>
+             <button class="play-sound-button">
+               <i class="fa-sharp fa-solid fa-circle-play"></i> Play Sound
+            </button>
          </div>
      </div>
  

@@ -278,43 +278,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Функція для закриття модального вікна (винесена для перевикористання) ---
+    function closeModal() {
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+        }
+        // Видаляємо клас 'active' для анімованого закриття
+        ingredientModal.classList.remove('active');
+    }
 
-    // --- Функція для показу модального вікна інгредієнта ---
+    // --- Призначення обробників подій для модального вікна (виконується ОДИН РАЗ) ---
+    // Ці обробники призначаються тут, всередині DOMContentLoaded, що є правильним місцем.
+    modalCloseButton.addEventListener('click', closeModal);
+
+    // Закриття модалки при кліку на оверлей (фон поза контентом)
+    ingredientModal.addEventListener('click', (e) => {
+        if (e.target === ingredientModal) { // Перевіряємо, чи клік був саме по оверлею, а не по контенту
+            closeModal();
+        }
+    });
+
+    // Обробник для кнопки "Play Sound"
+    playSoundButton.addEventListener('click', () => {
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+        }
+        const textToSpeak = modalTitle.textContent; // Беремо текст з заголовка модалки
+        if (textToSpeak) {
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'en-US'; // Можете змінити на 'uk-UA' для української, якщо доступно
+            utterance.rate = 0.8; // Уповільнюємо швидкість вимови
+            speechSynthesis.speak(utterance);
+        }
+    });
+
+
+    // --- Оновлена функція showIngredientModal ---
+    // Ця функція тепер просто оновлює вміст модалки та додає клас 'active'.
+    // Вона викликається, коли користувач клікає на інгредієнт.
     function showIngredientModal(ingredient) {
         modalImage.src = ingredient.modalImg; // Використовуємо modalImg для великого зображення
         modalImage.alt = ingredient.name;
         modalTitle.textContent = ingredient.name;
 
-        ingredientModal.style.display = 'flex'; // Показуємо модальне вікно
-
-        // Обробники для модального вікна
-        modalCloseButton.onclick = () => {
-            // Зупиняємо мовлення, якщо воно активне
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-            }
-            ingredientModal.style.display = 'none';
-        };
-
-        // Обробник для кнопки "Play Sound" тепер використовує Web Speech API
-        playSoundButton.onclick = () => {
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-            }
-            const utterance = new SpeechSynthesisUtterance(ingredient.name);
-            utterance.lang = 'en-US'; // Можете змінити на 'uk-UA' для української, якщо доступно
-            utterance.rate = 0.8; // Уповільнюємо швидкість вимови
-            speechSynthesis.speak(utterance);
-        };
-
-        ingredientModal.onclick = (e) => { // Закриття по кліку поза контентом
-            if (e.target === ingredientModal) {
-                if (speechSynthesis.speaking) {
-                    speechSynthesis.cancel();
-                }
-                ingredientModal.style.display = 'none';
-            }
-        };
+        // Додаємо клас 'active' для відображення модалки з анімацією
+        ingredientModal.classList.add('active'); 
     }
 
     // --- Функція для показу екрану завершення рівня ---
