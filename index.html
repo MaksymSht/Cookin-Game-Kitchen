@@ -10,7 +10,7 @@
      crossorigin="anonymous" referrerpolicy="no-referrer" />
  </head>
  <body>
-    <div id="overlay-blocker"></div>
+
      <div id="kitchen">
          <img
              id="kitchen-bg-img"
@@ -21,14 +21,9 @@
          <div id="dropzone-container">
              <div id="pot" class="dropzone active-dropzone" title="Pot (for boiling)"></div>
              <div id="oven" class="dropzone" title="Oven (for baking)"></div>
-             <div
-                 id="fridge"
-                 class="dropzone"
-                 title="Fridge (for storing cold food)"
-             ></div>
+             <div id="fridge" class="dropzone" title="Fridge (for storing cold food)"></div>
          </div>
      </div>
- 
      <button id="toggle-task-panel" title="View Task">
          <img class = "task-icon" src = "img/icons-task.png" alt="">
      </button>
@@ -38,16 +33,15 @@
              <h3>Current Task</h3>
              <span class="close-button" id="close-task-panel">&times;</span>
          </div>
-         <div class="task-panel-content">
-             <h4>Cook Creamy Vegetables Soup</h4>
-             <p class="hint">Hint: Use the pot to cook soup. 😉</p>
-             <p>To cook it, you need to use the correct ingredients.</p>
-             <p>Each correct or incorrect choice gives or takes away points.</p>
-             <p>Try to get as many points as possible.</p>
-             <p class="bonus-info">**Bonus:** Get an extra 3 points if you add all correct ingredients without any mistakes!</p>
-             <p class="believe-message">I believe in you! 😊</p>
-             
-         </div>
+            <div class="task-panel-content">
+                <h4 id="taskTitle"></h4>
+                 <p class="hint" id="taskHint"></p>
+                 <p>To cook it, you need to use the correct ingredients.</p>
+                 <p>Each correct or incorrect choice gives or takes away points.</p>
+                 <p>Try to get as many points as possible.</p>
+                 <p class="bonus-info" id="taskBonus"></p>
+                 <p class="believe-message">I believe in you! 😊</p>
+            </div>
      </aside>
  
  
