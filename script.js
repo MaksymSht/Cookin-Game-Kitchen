@@ -45,8 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let currentScore = 0;
+    let totalGameScore = 0;
     let correctIngredientsAdded = new Set();
     let incorrectIngredientsDroppedCount = 0;
+    let totalIncorrectDropsOverall = 0; // Нова змінна для загальної статистики неправильних дропів
     let currentLevelIndex = 0;
 
     // --- Дані для ВСІХ рівнів (ОНОВЛЕНО) ---
@@ -301,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     currentScore += currentLevelData.incorrectMultiplier;
                     incorrectIngredientsDroppedCount++;
+                    totalIncorrectDropsOverall++; // Збільшуємо загальний лічильник неправильних дропів
                     console.log(`Неправильний інгредієнт: ${ingredientData.name}. Поточні бали: ${currentScore}`);
                     showFeedbackMessage(`Oh no... You don’t use ${ingredientData.name} for this dish 😟. Try again! 😊`);
                     showScoreFeedback(currentLevelData.incorrectMultiplier, "", zone);
@@ -364,10 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Бонус! +${currentLevelData.bonusPoints} балів за проходження без помилок. Поточні бали: ${currentScore}`);
             }
 
+            totalGameScore += currentScore; // Додаємо бали поточного рівня до загального рахунку
+
             playStarsAnimation();
 
             setTimeout(() => {
-                showLevelCompleteScreen();
+                showLevelCompleteScreen(); // Завжди викликаємо екран завершення поточного рівня
             }, 2500);
         }
     }
@@ -396,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         starContainer.addEventListener('animationend', (event) => {
+            // Перевіряємо, чи всі зірки завершили анімацію
             if (event.target.classList.contains('star') && !starContainer.querySelector('.star')) {
                 starContainer.remove();
             }
@@ -441,70 +447,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Функція для показу екрану завершення рівня ---
     function showLevelCompleteScreen() {
+        // Приховуємо ігрові елементи
         if (ingredientsContainer) ingredientsContainer.style.display = 'none';
         if (dropzoneContainer) dropzoneContainer.style.display = 'none';
-        if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'none';
+        if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'none'; // Виправлено typo
         if (taskPanel) taskPanel.classList.remove('active');
 
         const correctIngsHtml = currentLevelData.correctIngredients.map(id => {
             const ing = currentLevelData.allIngredients.find(i => i.id === id);
             return `<div class="ingredient-display-item correct" data-id="${ing.id}">
-                        <img src="${ing.thumbImg}" alt="${ing.name}">
-                        <span>${ing.name}</span>
-                    </div>`;
+                                <img src="${ing.thumbImg}" alt="${ing.name}">
+                                <span>${ing.name}</span>
+                            </div>`;
         }).join('');
 
-        const incorrectIngsHtml = currentLevelData.incorrectIngredients.map(id => {
+        const incorrectIngsHtml = currentLevelData.incorrectIngredients.filter(id => !currentLevelData.correctIngredients.includes(id)).map(id => { // Фільтруємо, щоб показувати лише "неправильні" інгредієнти для цього рівня, які не є правильними.
             const ing = currentLevelData.allIngredients.find(i => i.id === id);
             return `<div class="ingredient-display-item incorrect" data-id="${ing.id}">
-                        <img src="${ing.thumbImg}" alt="${ing.name}">
-                        <span>${ing.name}</span>
-                    </div>`;
+                                <img src="${ing.thumbImg}" alt="${ing.name}">
+                                <span>${ing.name}</span>
+                            </div>`;
         }).join('');
 
         levelCompleteScreen.innerHTML = `
-            <h1>🥳 Yay! Well done!</h1>
-            <p>You made a perfect ${currentLevelData.name}! Your score: ${currentScore} points! 🎯😊</p>
-            <div class="ingredient-columns-container">
-                <div class="ingredient-column">
-                    <h2>Correct Ingredients</h2>
-                    <div class="ingredient-list">
-                        ${correctIngsHtml}
+                <h1>🥳 Yay! Well done!</h1>
+                <p>You made a perfect ${currentLevelData.name}! Your score: ${currentScore} points! 🎯😊</p>
+                <div class="ingredient-columns-container">
+                    <div class="ingredient-column">
+                        <h2>Correct Ingredients</h2>
+                        <div class="ingredient-list">
+                            ${correctIngsHtml}
+                        </div>
+                    </div>
+                    <div class="ingredient-column">
+                        <h2>Incorrect Ingredients (for this dish)</h2>
+                        <div class="ingredient-list">
+                            ${incorrectIngsHtml}
+                        </div>
                     </div>
                 </div>
-                <div class="ingredient-column">
-                    <h2>Incorrect Ingredients (for this dish)</h2>
-                    <div class="ingredient-list">
-                        ${incorrectIngsHtml}
-                    </div>
-                </div>
-            </div>
-            <button id="next-level-button"></button>
-        `;
+                <button id="next-level-button">Next Level</button> `;
         levelCompleteScreen.style.display = 'flex';
 
         const nextLevelButton = document.getElementById('next-level-button');
-        if (currentLevelIndex < allLevelsData.length - 1) {
-            nextLevelButton.textContent = 'Next Level';
-            nextLevelButton.addEventListener('click', () => {
+        if (currentLevelIndex === 3) { // currentLevelIndex 3 відповідає 4-му рівню (0-індексація)
+            nextLevelButton.textContent = 'Next'; // Змінюємо текст на "Далі"
+        } else {
+            nextLevelButton.textContent = 'Next level'; // Для інших рівнів залишаємо "Наступний рівень"
+        }
+        nextLevelButton.addEventListener('click', () => {
+            if (currentLevelIndex === allLevelsData.length - 1) {
+                // Це був останній рівень, тому після "Next Level" показуємо фінальний екран
+                levelCompleteScreen.style.display = 'none'; // Приховуємо поточний екран
+                showFinalGameScreen(); // Показуємо загальну статистику
+            } else {
+                // Це не останній рівень, переходимо до наступного
                 currentLevelIndex++;
                 loadLevel(currentLevelIndex);
                 levelCompleteScreen.style.display = 'none';
                 if (ingredientsContainer) ingredientsContainer.style.display = 'flex';
                 if (dropzoneContainer) dropzoneContainer.style.display = 'block';
                 if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'block';
-            });
-        } else {
-            nextLevelButton.textContent = 'Restart Game';
-            nextLevelButton.addEventListener('click', () => {
-                currentLevelIndex = 0;
-                loadLevel(currentLevelIndex);
-                levelCompleteScreen.style.display = 'none';
-                if (ingredientsContainer) ingredientsContainer.style.display = 'flex';
-                if (dropzoneContainer) dropzoneContainer.style.display = 'block';
-                if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'block';
-            });
-        }
+            }
+        });
 
         levelCompleteScreen.querySelectorAll('.ingredient-display-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -517,18 +522,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Можна додати функцію для фінального екрану, якщо всі рівні пройдені
+    // --- Функція для відображення фінального екрану з загальною статистикою ---
     function showFinalGameScreen() {
+        // Приховуємо всі ігрові елементи, якщо вони ще видимі
+        if (ingredientsContainer) ingredientsContainer.style.display = 'none';
+        if (dropzoneContainer) dropzoneContainer.style.display = 'none';
+        if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'none';
+        if (taskPanel) taskPanel.classList.remove('active');
+
+        // Розрахунок максимального можливого рахунку за всю гру
+        const maxPossibleTotalScore = allLevelsData.reduce((sum, level) => {
+            return sum + (level.correctIngredients.length * level.correctMultiplier) + level.bonusPoints;
+        }, 0);
+
         levelCompleteScreen.innerHTML = `
-            <h1>🎉 Congratulations! You completed all levels! 🎉</h1>
-            <p>You are a true master chef! Your total score: ${/* Тут треба буде зберігати сумарний бал за всі рівні */ 0} points!</p>
+            <h1 class="final-title">🎉 Congratulations! You completed all levels! 🎉</h1>
+            <p class="final-summary">You are a true master chef!</p>
+            <p class="final-score">Your total score: <strong>${totalGameScore}</strong> out of <strong>${maxPossibleTotalScore}</strong> points! 🎯</p>
+            
+            <div class="game-stats">
+                <h3>Game Summary:</h3>
+                <p>Levels completed: <strong>${allLevelsData.length}</strong> / <strong>${allLevelsData.length}</strong></p>
+                <p>Total incorrect drops: <strong>${totalIncorrectDropsOverall}</strong></p>
+                <p>Average score per level: <strong>${Math.round(totalGameScore / allLevelsData.length)}</strong> points</p>
+            </div>
+
             <button id="restart-game-button">Play Again</button>
         `;
         levelCompleteScreen.style.display = 'flex';
+        levelCompleteScreen.classList.add('final-game-screen'); // Додаємо клас для CSS стилізації фінального екрану
+
         document.getElementById('restart-game-button').addEventListener('click', () => {
             currentLevelIndex = 0;
+            totalGameScore = 0;
+            totalIncorrectDropsOverall = 0; // Обнуляємо загальну статистику при рестарті
             loadLevel(currentLevelIndex);
             levelCompleteScreen.style.display = 'none';
+            levelCompleteScreen.classList.remove('final-game-screen'); // Видаляємо клас, щоб не конфліктував з CSS
             if (ingredientsContainer) ingredientsContainer.style.display = 'flex';
             if (dropzoneContainer) dropzoneContainer.style.display = 'block';
             if (toggleTaskPanelButton) toggleTaskPanelButton.style.display = 'block';
@@ -559,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadLevel(levelIndex) {
         if (levelIndex >= allLevelsData.length) {
             console.warn('Attempted to load a level that does not exist:', levelIndex);
-            showFinalGameScreen(); // Покликати функцію для фінального екрану
+            levelCompleteScreen.style.display = 'none';
             return;
         }
 
@@ -588,25 +618,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeZoneElement) {
             activeZoneElement.classList.add('active-dropzone');
         }
-
-        // Оновлюємо фонове зображення кухні
-        // Вам потрібно буде переконатися, що у вас є ці зображення:
-        // img/kitchen-bg-pot.jpg (або поточний kitchen-bg.jpg),
-        // img/kitchen-bg-oven.jpg, img/kitchen-bg-fridge.jpg
-        // switch (currentLevelData.activeZone) {
-        //     case 'pot':
-        //         kitchenBgImg.src = 'img/kitchen-bg.jpg';
-        //         break;
-        //     case 'oven':
-        //         kitchenBgImg.src = 'img/kitchen-bg-oven.jpg';
-        //         break;
-        //     case 'fridge':
-        //         kitchenBgImg.src = 'img/kitchen-bg-fridge.jpg';
-        //         break;
-        //     default:
-        //         kitchenBgImg.src = 'img/kitchen-bg.jpg';
-        //         break;
-        // }
 
         console.log(`Завантажено рівень: ${currentLevelData.name}`);
         updateDropzoneContainerPosition(); // Перерахувати позицію дропзон після зміни фону

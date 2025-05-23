@@ -574,7 +574,7 @@ html,
      display: none;
  }
  
- #next-level-button {
+ #next-level-button, #restart-game-button {
      margin-top: 30px; /* Зменшено відступ */
      padding: 15px 30px; /* Зменшена кнопка */
      font-size: 1.5em;
@@ -858,4 +858,5 @@ html,
      color: #f44336; /* Червоний для мінусових балів */
      transform: translate(-50%, -30%) scale(0.9); /* Рух вниз і легке зменшення */
  }
+
 
